@@ -12,6 +12,7 @@ type Service struct {
 	Store store.StorerClient
 }
 
+// NewTask will assign an ID to a task definition, and store it into the storage backend
 func (s *Service) NewTask(ctx context.Context, create *command.TaskCreate, created *command.TaskCreated) error {
 	uuid := uuid.NewV4().String()
 	created.Id = uuid

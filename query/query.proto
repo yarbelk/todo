@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+import "github.com/yarbelk/todo/task.proto";
+
+service Queryer {
+  rpc GetTask(TaskQuery) returns (todo.TaskDefinition) {}
+  rpc AllTasks(AllTasksParams) returns (todo.TaskList) {}
+}
+
+message TaskQuery {
+  string id = 1;
+}
+
+message AllTasksParams {}

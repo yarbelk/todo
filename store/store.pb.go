@@ -9,14 +9,13 @@ It is generated from these files:
 	github.com/yarbelk/todo/store/store.proto
 
 It has these top-level messages:
-	TaskDefinition
-	TaskID
 */
 package store
 
 import proto "github.com/golang/protobuf/proto"
 import fmt "fmt"
 import math "math"
+import todo "github.com/yarbelk/todo"
 
 import (
 	client "github.com/micro/go-micro/client"
@@ -35,31 +34,6 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type TaskDefinition struct {
-	Id          string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-	Description string `protobuf:"bytes,2,opt,name=description" json:"description,omitempty"`
-	Completed   bool   `protobuf:"varint,3,opt,name=completed" json:"completed,omitempty"`
-}
-
-func (m *TaskDefinition) Reset()                    { *m = TaskDefinition{} }
-func (m *TaskDefinition) String() string            { return proto.CompactTextString(m) }
-func (*TaskDefinition) ProtoMessage()               {}
-func (*TaskDefinition) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
-
-type TaskID struct {
-	Id string `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
-}
-
-func (m *TaskID) Reset()                    { *m = TaskID{} }
-func (m *TaskID) String() string            { return proto.CompactTextString(m) }
-func (*TaskID) ProtoMessage()               {}
-func (*TaskID) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
-
-func init() {
-	proto.RegisterType((*TaskDefinition)(nil), "TaskDefinition")
-	proto.RegisterType((*TaskID)(nil), "TaskID")
-}
-
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
 var _ client.Option
@@ -68,8 +42,9 @@ var _ server.Option
 // Client API for Storer service
 
 type StorerClient interface {
-	Save(ctx context.Context, in *TaskDefinition, opts ...client.CallOption) (*TaskDefinition, error)
-	Load(ctx context.Context, in *TaskID, opts ...client.CallOption) (*TaskDefinition, error)
+	Save(ctx context.Context, in *todo.TaskDefinition, opts ...client.CallOption) (*todo.TaskDefinition, error)
+	Load(ctx context.Context, in *todo.TaskID, opts ...client.CallOption) (*todo.TaskDefinition, error)
+	All(ctx context.Context, in *todo.AllTasksParams, opts ...client.CallOption) (*todo.TaskList, error)
 }
 
 type storerClient struct {
@@ -90,9 +65,9 @@ func NewStorerClient(serviceName string, c client.Client) StorerClient {
 	}
 }
 
-func (c *storerClient) Save(ctx context.Context, in *TaskDefinition, opts ...client.CallOption) (*TaskDefinition, error) {
+func (c *storerClient) Save(ctx context.Context, in *todo.TaskDefinition, opts ...client.CallOption) (*todo.TaskDefinition, error) {
 	req := c.c.NewRequest(c.serviceName, "Storer.Save", in)
-	out := new(TaskDefinition)
+	out := new(todo.TaskDefinition)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -100,9 +75,19 @@ func (c *storerClient) Save(ctx context.Context, in *TaskDefinition, opts ...cli
 	return out, nil
 }
 
-func (c *storerClient) Load(ctx context.Context, in *TaskID, opts ...client.CallOption) (*TaskDefinition, error) {
+func (c *storerClient) Load(ctx context.Context, in *todo.TaskID, opts ...client.CallOption) (*todo.TaskDefinition, error) {
 	req := c.c.NewRequest(c.serviceName, "Storer.Load", in)
-	out := new(TaskDefinition)
+	out := new(todo.TaskDefinition)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *storerClient) All(ctx context.Context, in *todo.AllTasksParams, opts ...client.CallOption) (*todo.TaskList, error) {
+	req := c.c.NewRequest(c.serviceName, "Storer.All", in)
+	out := new(todo.TaskList)
 	err := c.c.Call(ctx, req, out, opts...)
 	if err != nil {
 		return nil, err
@@ -113,8 +98,9 @@ func (c *storerClient) Load(ctx context.Context, in *TaskID, opts ...client.Call
 // Server API for Storer service
 
 type StorerHandler interface {
-	Save(context.Context, *TaskDefinition, *TaskDefinition) error
-	Load(context.Context, *TaskID, *TaskDefinition) error
+	Save(context.Context, *todo.TaskDefinition, *todo.TaskDefinition) error
+	Load(context.Context, *todo.TaskID, *todo.TaskDefinition) error
+	All(context.Context, *todo.AllTasksParams, *todo.TaskList) error
 }
 
 func RegisterStorerHandler(s server.Server, hdlr StorerHandler, opts ...server.HandlerOption) {
@@ -125,29 +111,31 @@ type Storer struct {
 	StorerHandler
 }
 
-func (h *Storer) Save(ctx context.Context, in *TaskDefinition, out *TaskDefinition) error {
+func (h *Storer) Save(ctx context.Context, in *todo.TaskDefinition, out *todo.TaskDefinition) error {
 	return h.StorerHandler.Save(ctx, in, out)
 }
 
-func (h *Storer) Load(ctx context.Context, in *TaskID, out *TaskDefinition) error {
+func (h *Storer) Load(ctx context.Context, in *todo.TaskID, out *todo.TaskDefinition) error {
 	return h.StorerHandler.Load(ctx, in, out)
+}
+
+func (h *Storer) All(ctx context.Context, in *todo.AllTasksParams, out *todo.TaskList) error {
+	return h.StorerHandler.All(ctx, in, out)
 }
 
 func init() { proto.RegisterFile("github.com/yarbelk/todo/store/store.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 195 bytes of a gzipped FileDescriptorProto
+	// 167 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0xe2, 0xd2, 0x4c, 0xcf, 0x2c, 0xc9,
 	0x28, 0x4d, 0xd2, 0x4b, 0xce, 0xcf, 0xd5, 0xaf, 0x4c, 0x2c, 0x4a, 0x4a, 0xcd, 0xc9, 0xd6, 0x2f,
 	0xc9, 0x4f, 0xc9, 0xd7, 0x2f, 0x2e, 0xc9, 0x2f, 0x4a, 0x85, 0x90, 0x7a, 0x05, 0x45, 0xf9, 0x25,
-	0xf9, 0x4a, 0x09, 0x5c, 0x7c, 0x21, 0x89, 0xc5, 0xd9, 0x2e, 0xa9, 0x69, 0x99, 0x79, 0x99, 0x25,
-	0x99, 0xf9, 0x79, 0x42, 0x7c, 0x5c, 0x4c, 0x99, 0x29, 0x12, 0x8c, 0x0a, 0x8c, 0x1a, 0x9c, 0x41,
-	0x4c, 0x99, 0x29, 0x42, 0x0a, 0x5c, 0xdc, 0x29, 0xa9, 0xc5, 0xc9, 0x45, 0x99, 0x05, 0x20, 0x69,
-	0x09, 0x26, 0xb0, 0x04, 0xb2, 0x90, 0x90, 0x0c, 0x17, 0x67, 0x72, 0x7e, 0x6e, 0x41, 0x4e, 0x6a,
-	0x49, 0x6a, 0x8a, 0x04, 0xb3, 0x02, 0xa3, 0x06, 0x47, 0x10, 0x42, 0x40, 0x49, 0x82, 0x8b, 0x0d,
-	0x64, 0x83, 0xa7, 0x0b, 0xba, 0xc9, 0x46, 0x11, 0x5c, 0x6c, 0xc1, 0x20, 0xa7, 0x14, 0x09, 0x69,
-	0x71, 0xb1, 0x04, 0x27, 0x96, 0xa5, 0x0a, 0xf1, 0xeb, 0xa1, 0x3a, 0x46, 0x0a, 0x5d, 0x40, 0x89,
-	0x41, 0x48, 0x89, 0x8b, 0xc5, 0x27, 0x3f, 0x31, 0x45, 0x88, 0x5d, 0x0f, 0x62, 0x2c, 0x16, 0x35,
-	0x49, 0x6c, 0x60, 0xcf, 0x19, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0xc9, 0xd1, 0xb5, 0x22, 0x09,
-	0x01, 0x00, 0x00,
+	0xf9, 0x52, 0x4a, 0xb8, 0x94, 0x96, 0x24, 0x16, 0x67, 0x43, 0xd4, 0x18, 0xcd, 0x66, 0xe4, 0x62,
+	0x0b, 0x06, 0xe9, 0x29, 0x12, 0x32, 0xe1, 0x62, 0x09, 0x4e, 0x2c, 0x4b, 0x15, 0x12, 0xd1, 0x03,
+	0x29, 0xd2, 0x0b, 0x49, 0x2c, 0xce, 0x76, 0x49, 0x4d, 0xcb, 0xcc, 0xcb, 0x2c, 0xc9, 0xcc, 0xcf,
+	0x93, 0xc2, 0x2a, 0xaa, 0xc4, 0x20, 0xa4, 0xc3, 0xc5, 0xe2, 0x93, 0x9f, 0x98, 0x22, 0xc4, 0x83,
+	0x90, 0xf7, 0x74, 0xc1, 0xa9, 0x5a, 0x97, 0x8b, 0xd9, 0x31, 0x27, 0x07, 0x66, 0x85, 0x63, 0x4e,
+	0x0e, 0x48, 0x45, 0x71, 0x40, 0x62, 0x51, 0x62, 0x6e, 0xb1, 0x14, 0x1f, 0x42, 0x93, 0x4f, 0x66,
+	0x71, 0x89, 0x12, 0x43, 0x12, 0x1b, 0xd8, 0x91, 0xc6, 0x80, 0x00, 0x00, 0x00, 0xff, 0xff, 0x1a,
+	0x07, 0x3c, 0x6f, 0xf5, 0x00, 0x00, 0x00,
 }

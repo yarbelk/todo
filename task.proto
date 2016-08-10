@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package todo;
+
+message TaskDefinition {
+  string id = 1;
+  string description = 2;
+  bool completed = 3;
+}
+
+message TaskID {
+  string id = 4;
+}
+
+message TaskList {
+  repeated todo.TaskDefinition tasks = 5;
+}
+
+message AllTasksParams {}

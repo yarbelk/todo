@@ -1,16 +1,9 @@
 syntax = "proto3";
 
+import "github.com/yarbelk/todo/task.proto";
+
 service Storer {
-  rpc Save(TaskDefinition) returns (TaskDefinition) {}
-  rpc Load(TaskID) returns (TaskDefinition) {}
-}
-
-message TaskDefinition {
-  string id = 1;
-  string description = 2;
-  bool completed = 3;
-}
-
-message TaskID {
-  string id = 1;
+  rpc Save(todo.TaskDefinition) returns (todo.TaskDefinition) {}
+  rpc Load(todo.TaskID) returns (todo.TaskDefinition) {}
+  rpc All(todo.AllTasksParams) returns (todo.TaskList) {}
 }
