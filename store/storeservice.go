@@ -3,6 +3,8 @@ package store
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 
 	"github.com/yarbelk/todo"
 	"golang.org/x/net/context"
@@ -37,12 +39,16 @@ func (ss *StoreService) Save(ctx context.Context, in *todo.TaskDefinition, out *
 	if in.Id == "" {
 		return MissingIDError
 	}
+	fmt.Println(ss, ss.Store)
 	return ss.Store.Update(func(tx *bolt.Tx) error {
+		log.Println("Start update1")
 		*out = *in
 		data, err := json.Marshal(out)
+		log.Println("Start update2")
 		if err != nil {
 			return err
 		}
+		log.Println("getting bucket")
 		b := tx.Bucket([]byte("todoStore"))
 		return b.Put([]byte(out.Id), data)
 	})
