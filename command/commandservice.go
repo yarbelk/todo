@@ -3,13 +3,15 @@ package command
 import (
 	"golang.org/x/net/context"
 
+	"github.com/micro/go-platform/log"
 	uuid "github.com/satori/go.uuid"
 	"github.com/yarbelk/todo"
 	"github.com/yarbelk/todo/store"
 )
 
 type Service struct {
-	Store store.StorerClient
+	Store  store.StorerClient
+	logger log.Logger
 }
 
 // NewTask will assign an ID to a task definition, and store it into the storage backend

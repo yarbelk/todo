@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 
+	"github.com/micro/go-platform/log"
+	"github.com/micro/go-platform/log/output/file"
 	"github.com/yarbelk/todo"
 	"golang.org/x/net/context"
 
@@ -14,6 +15,7 @@ import (
 
 type StoreService struct {
 	Store *bolt.DB
+	log   log.Log
 }
 
 func New(filename string) (ss *StoreService, err error) {
@@ -26,7 +28,17 @@ func New(filename string) (ss *StoreService, err error) {
 		_, err := tx.CreateBucketIfNotExists([]byte("todoStore"))
 		return err
 	})
+
+	output := file.NewOutput(log.OutputName("/dev/stdout"))
 	ss.Store = db
+	ss.log = log.NewLog(
+		log.WithOutput(output),
+		log.WithLevel(log.InfoLevel),
+	)
+	if err := ss.log.Init(); err != nil {
+		panic(err.Error())
+	}
+	ss.log.Info("Starting storage service")
 	return
 }
 
@@ -37,18 +49,17 @@ var MissingIDError = errors.New("ID field is missing")
 // an Upsert.
 func (ss *StoreService) Save(ctx context.Context, in *todo.TaskDefinition, out *todo.TaskDefinition) error {
 	if in.Id == "" {
+		ss.log.Errorf("Save called without ID")
 		return MissingIDError
 	}
+	ss.log.Debugf("Saving ID %s", in.Id)
 	fmt.Println(ss, ss.Store)
 	return ss.Store.Update(func(tx *bolt.Tx) error {
-		log.Println("Start update1")
 		*out = *in
 		data, err := json.Marshal(out)
-		log.Println("Start update2")
 		if err != nil {
 			return err
 		}
-		log.Println("getting bucket")
 		b := tx.Bucket([]byte("todoStore"))
 		return b.Put([]byte(out.Id), data)
 	})
@@ -73,6 +84,7 @@ func (ss *StoreService) All(ctx context.Context, in *todo.AllTasksParams, out *t
 		return b.ForEach(func(_, taskData []byte) error {
 			var task *todo.TaskDefinition = &todo.TaskDefinition{}
 			if err := json.Unmarshal(taskData, task); err != nil {
+				ss.log.Errorf("Error unmarshaling for all tasks: \n%s\n\n%#v", err.Error(), b.Stats())
 				return err
 			}
 			tasks = append(tasks, *task)

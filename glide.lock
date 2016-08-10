@@ -1,5 +1,5 @@
-hash: a906aac8f40b57383fbdb599812fd962ff6e8ace74a8fd11741fc895cfee5974
-updated: 2016-08-10T09:50:07.382184929+08:00
+hash: 7671d694ddcf5be0255ab6160e385e31e5b9e79c02e079d23c6a27d6b1340fec
+updated: 2016-08-10T14:36:36.380277241+08:00
 imports:
 - name: github.com/armon/go-radix
   version: 4239b77079c7b5d1243b7b4736304ce8ddb6f0f2
@@ -7,26 +7,79 @@ imports:
   version: e1439544d8ecd0f3e9373a636d447668096a8f81
 - name: github.com/boltdb/bolt
   version: 94c8db596809690a3f7046fa83c7b0dda13a3222
+- name: github.com/eclipse/paho.mqtt.golang
+  version: 44eec149d4433449add74781ffc86cc60d3f1598
+  subpackages:
+  - packets
 - name: github.com/golang/protobuf
   version: 2c1988e8c18d14b142c0b472624f71647cf39adb
   subpackages:
   - proto
+- name: github.com/hashicorp/consul
+  version: d6aa033793a68b509d336b3bac6ebe36ac0ef818
+  subpackages:
+  - api
+  - watch
+- name: github.com/hashicorp/go-cleanhttp
+  version: ad28ea4487f05916463e2423a55166280e8254b5
+- name: github.com/hashicorp/serf
+  version: a01569795d12afbdb3698739b614e057ee289fa0
+  subpackages:
+  - coordinate
 - name: github.com/mattn/go-isatty
   version: 3a115632dcd687f9c8cd01679c83a06a0e21c1f3
+- name: github.com/micro/cli
+  version: 3d2263bb092286dde294a31049c92665f8373820
 - name: github.com/micro/go-micro
   version: 66c38b75aa8d6326f0d2e967d2ea45ba29ff8a28
   subpackages:
   - client
   - server
+  - broker
+  - cmd
+  - metadata
+  - registry
+  - selector
+  - transport
+  - codec
+  - codec/jsonrpc
+  - codec/protorpc
+  - errors
+  - server/debug
+  - broker/http
+  - broker/mqtt
+  - registry/consul
+  - registry/mdns
+  - selector/cache
+  - transport/http
+  - server/debug/proto
 - name: github.com/micro/go-platform
   version: 1e631bb6815c2dbabe589649b8d89b5a460c41f5
   subpackages:
   - config
   - auth
+  - log
+  - log/output/file
 - name: github.com/micro/go-plugins
   version: b014ffad595416c5c6f6b9868e2e55b5ad9b090d
+- name: github.com/micro/mdns
+  version: ab413e42fed3fdd8198ac4df3db5a342eb67d6e4
+- name: github.com/micro/micro
+  version: 380ec2633c79b8a7dbc233bf29b3ef0f12ab50f3
+  subpackages:
+  - '...'
+- name: github.com/micro/misc
+  version: 677e2a0beb40a3dd7418548fe0cdc661e2922859
+  subpackages:
+  - lib/tls
+- name: github.com/miekg/dns
+  version: db96a2b759cdef4f11a34506a42eb8d1290c598e
 - name: github.com/mitchellh/cli
   version: 168daae10d6ff81b8b1201b0a4c9607d7e9b82e3
+- name: github.com/mitchellh/hashstructure
+  version: b098c52ef6beab8cd82bc4a32422cf54b890e8fa
+- name: github.com/pborman/uuid
+  version: a97ce2ca70fa5a848076093f05e639a89ca34d06
 - name: github.com/satori/go.uuid
   version: 0aa62d5ddceb50dbcb909d790b5345affd3669b6
 - name: golang.org/x/crypto
@@ -37,6 +90,15 @@ imports:
   version: 075e191f18186a8ff2becaf64478e30f4545cdad
   subpackages:
   - context
+  - websocket
+  - ipv4
+  - ipv6
+  - bpf
+  - internal/iana
+- name: golang.org/x/sys
+  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  subpackages:
+  - unix
 - name: gopkg.in/fsnotify.v1
   version: a8a77c9133d2d6fd8334f3260d06f60e8d80a5fb
 testImports: []

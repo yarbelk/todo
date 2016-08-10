@@ -27,3 +27,8 @@ import:
 - package: golang.org/x/crypto
   subpackages:
   - bcrypt
+- package: github.com/pborman/uuid
+  version: ^1.0.0
+- package: github.com/micro/micro
+  subpackages:
+  - '...'

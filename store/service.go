@@ -16,8 +16,8 @@ func NewService() micro.Service {
 		micro.Flags(cli.StringFlag{
 			Name:        "db-file",
 			EnvVar:      "TODO_DB_FILE",
-			Value:       "todo.db",
-			Usage:       "`FILENAME` is the file to use for the boltdb backed storage",
+			Value:       "/tmp/todo.db",
+			Usage:       "the file to use for the boltdb backed storage",
 			Destination: &StorageFile,
 		}),
 	)
