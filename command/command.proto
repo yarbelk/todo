@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+service Commander {
+  rpc NewTask(TaskCreate) returns (TaskCreated) {}
+}
+
+message TaskCreate {
+  string description = 1;
+}
+
+message TaskCreated {
+  string id = 2;
+  string description = 3;
+  }

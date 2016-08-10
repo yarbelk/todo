@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+service Storer {
+  rpc Save(TaskDefinition) returns (TaskDefinition) {}
+  rpc Load(TaskID) returns (TaskDefinition) {}
+}
+
+message TaskDefinition {
+  string id = 1;
+  string description = 2;
+  bool completed = 3;
+}
+
+message TaskID {
+  string id = 1;
+}
