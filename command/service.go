@@ -1,24 +1,27 @@
 package command
 
-import "github.com/micro/go-micro"
+import (
+	"github.com/micro/cli"
+	"github.com/micro/go-micro"
+)
 
 var ServiceName string = "todo.command"
 
-func NewService() (micro.Service, error) {
-	opts := []micro.Option{
+func NewService() micro.Service {
+	var service micro.Service
+	service = micro.NewService(
 		micro.Name(ServiceName),
-	}
-	service := micro.NewService(opts...)
+		micro.Action(func(ctx *cli.Context) {
+			commander := New()
+			RegisterCommanderHandler(service.Server(), commander)
+			service.Run()
+		}),
+	)
 
-	service.Init()
-
-	commander := New()
-
-	RegisterCommanderHandler(service.Server(), commander)
-	return service, nil
+	return service
 }
 
-func NewClient() QueryerClient {
+func NewClient() CommanderClient {
 	opts := []micro.Option{
 		micro.Name(ServiceName + ".client"),
 	}

@@ -1,21 +1,23 @@
 package query
 
-import "github.com/micro/go-micro"
+import (
+	"github.com/micro/cli"
+	"github.com/micro/go-micro"
+)
 
 var ServiceName string = "todo.query"
 
-func NewService() (micro.Service, error) {
-	opts := []micro.Option{
+func NewService() micro.Service {
+	var service micro.Service
+	service = micro.NewService(
 		micro.Name(ServiceName),
-	}
-	service := micro.NewService(opts...)
-
-	service.Init()
-
-	queryer := New()
-
-	RegisterQueryerHandler(service.Server(), queryer)
-	return service, nil
+		micro.Action(func(ctx *cli.Context) {
+			queryer := New()
+			RegisterQueryerHandler(service.Server(), queryer)
+			service.Run()
+		}),
+	)
+	return service
 }
 
 func NewClient() QueryerClient {
