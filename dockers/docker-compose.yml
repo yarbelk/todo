@@ -1,51 +1,84 @@
-elasticsearch:
-  image: elasticsearch:latest
-  command: elasticsearch -Des.network.host=0.0.0.0
-  ports:
-    - "9200:9200"
-    - "9300:9300"
+version: '2'
+networks:
+  todo-net:
+    driver: bridge
+services:
+  elasticsearch:
+    image: elasticsearch:latest
+    command: elasticsearch -Des.network.host=0.0.0.0
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+  logstash:
+    build: logstash/
+    command: logstash -f /etc/logstash/conf.d/logstash.conf
+    volumes:
+      - ./logstash/config:/etc/logstash/conf.d
+    ports:
+      - "5000:5000"
+  kibana:
+    build: kibana/
+    volumes:
+      - ./kibana/config/:/opt/kibana/config/
+    ports:
+      - "5601:5601"
+  consul:
+    networks:
+      todo-net:
+        aliases:
+          - consul
 
-logstash:
-  build: logstash/
-  command: logstash -f /etc/logstash/conf.d/logstash.conf
-  volumes:
-    - ./logstash/config:/etc/logstash/conf.d
-  ports:
-    - "5000:5000"
-  links:
-    - elasticsearch
-kibana:
-  build: kibana/
-  volumes:
-    - ./kibana/config/:/opt/kibana/config/
-  ports:
-    - "5601:5601"
-  links:
-    - elasticsearch
-consul:
-  image: consul
-store:
-  image: yarbelk/todo-store
-  command: ./run-store.sh
-  # command: store-srv --registry_address=$CONSUL_PORT_8301_TCP_ADDR --broker_address=0.0.0.0:9000 --server_address=0.0.0.0:9001
-  ports:
-    - "9000"
-    - "9001"
-  links: 
-    - consul
-commander:
-  image: yarbelk/todo-commander
-  links: 
-    - consul
-  command: command-srv --registry_address=$CONSUL_PORT_8301_TCP_ADDR --broker_address=0.0.0.0:9000 --server_address=0.0.0.0:9001
-  ports:
-    - "9000"
-    - "9001"
-query:
-  image: yarbelk/todo-query
-  links: 
-    - consul
-  command: query-srv --registry_address=$CONSUL_PORT_8301_TCP_ADDR --broker_address=0.0.0.0:9000 --server_address=0.0.0.0:9001
-  ports:
-    - "9000"
-    - "9001"
+    image: consul
+    command: consul agent -server -bootstrap -client 0.0.0.0 -data-dir /consul/data
+  consul-node1:
+    networks:
+      todo-net:
+        aliases:
+          - consul-node1
+    depends_on: 
+      - consul
+    image: consul
+    command: consul agent -server -bootstrap-expect 3 -join consul -client 0.0.0.0
+  consul-node2:
+    networks:
+      todo-net:
+        aliases:
+          - consul-node2
+    depends_on: 
+      - consul
+    image: consul
+    command: consul agent -server -bootstrap-expect 3 -join consul -client 0.0.0.0
+  store:
+    networks:
+      - todo-net
+    depends_on:
+      - consul
+      - consul-node1
+      - consul-node2
+    build:
+      context: ./store
+    ports:
+      - "9000"
+      - "9001"
+  query:
+    networks:
+      - todo-net
+    depends_on: 
+      - store
+      - consul
+    build:
+      context: ./query
+    ports:
+      - "9000"
+      - "9001"
+  commander:
+    networks:
+      - todo-net
+    depends_on: 
+      - store
+      - consul
+    build:
+      context: ./commander
+    ports:
+      - "9000"
+      - "9001"

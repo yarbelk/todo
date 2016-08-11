@@ -1,6 +1,6 @@
 GIT_VERSION := $(shell git describe --abbrev=4 --dirty --always --tags)
 
-all: store-srv command-srv query-srv
+all: clean store-srv command-srv query-srv
 .PHONY: all
 
 store-srv: store/cli/store-srv/main.go
@@ -14,4 +14,4 @@ query-srv: query/cli/query-srv/main.go
 .PHONY: clean
 	
 clean:
-	rm command-srv store-srv query-srv
+	rm command-srv store-srv query-srv || true
