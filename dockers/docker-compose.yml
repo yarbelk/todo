@@ -4,19 +4,29 @@ networks:
     driver: bridge
 services:
   elasticsearch:
+    networks:
+      - todo-net
     image: elasticsearch:latest
     command: elasticsearch -Des.network.host=0.0.0.0
     ports:
       - "9200:9200"
       - "9300:9300"
   logstash:
+    networks:
+      todo-net:
+        aliases:
+          - logstash
     build: logstash/
     command: logstash -f /etc/logstash/conf.d/logstash.conf
     volumes:
       - ./logstash/config:/etc/logstash/conf.d
     ports:
       - "5000:5000"
+      - "12201:12201"
+      - "12201/udp:12201/udp"
   kibana:
+    networks:
+      - todo-net
     build: kibana/
     volumes:
       - ./kibana/config/:/opt/kibana/config/
@@ -27,7 +37,6 @@ services:
       todo-net:
         aliases:
           - consul
-
     image: consul
     command: consul agent -server -bootstrap -client 0.0.0.0 -data-dir /consul/data
   consul-node1:
@@ -38,7 +47,7 @@ services:
     depends_on: 
       - consul
     image: consul
-    command: consul agent -server -bootstrap-expect 3 -join consul -client 0.0.0.0
+    command: consul agent -server -bootstrap-expect 3 -join consul -client 0.0.0.0 -data-dir /consul/data
   consul-node2:
     networks:
       todo-net:
@@ -47,14 +56,21 @@ services:
     depends_on: 
       - consul
     image: consul
-    command: consul agent -server -bootstrap-expect 3 -join consul -client 0.0.0.0
+    command: consul agent -server -bootstrap-expect 3 -join consul -client 0.0.0.0 -data-dir /consul/data
   store:
     networks:
       - todo-net
     depends_on:
+      - logstash
       - consul
       - consul-node1
       - consul-node2
+    links:
+      - logstash
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://logstash:12201"
     build:
       context: ./store
     ports:
