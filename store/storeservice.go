@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/micro/go-platform/log"
-	"github.com/micro/go-platform/log/output/file"
 	"github.com/yarbelk/todo"
 	"golang.org/x/net/context"
 
@@ -18,8 +17,9 @@ type StoreService struct {
 	log   log.Log
 }
 
-func New(filename string) (ss *StoreService, err error) {
+func New(filename string, logger log.Log) (ss *StoreService, err error) {
 	ss = &StoreService{}
+	ss.log = logger
 	db, err := bolt.Open(filename, 0600, nil)
 	if err != nil {
 		return
@@ -29,15 +29,8 @@ func New(filename string) (ss *StoreService, err error) {
 		return err
 	})
 
-	output := file.NewOutput(log.OutputName("/dev/stdout"))
+	// output := file.NewOutput(log.OutputName("/dev/stdout"))
 	ss.Store = db
-	ss.log = log.NewLog(
-		log.WithOutput(output),
-		log.WithLevel(log.InfoLevel),
-	)
-	if err := ss.log.Init(); err != nil {
-		panic(err.Error())
-	}
 	ss.log.Info("Starting storage service")
 	return
 }

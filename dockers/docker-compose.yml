@@ -22,8 +22,8 @@ services:
       - ./logstash/config:/etc/logstash/conf.d
     ports:
       - "5000:5000"
-      - "12201:12201"
-      - "12201/udp:12201/udp"
+      - "5001:5001"
+      - "12201/udp"
   kibana:
     networks:
       - todo-net
@@ -33,6 +33,11 @@ services:
     ports:
       - "5601:5601"
   consul:
+    logging:
+      driver: gelf
+      options:
+        gelf-address: "udp://localhost:12201"
+        gelf-tag: consul
     networks:
       todo-net:
         aliases:
@@ -70,7 +75,8 @@ services:
     logging:
       driver: gelf
       options:
-        gelf-address: "udp://logstash:12201"
+        gelf-address: "udp://localhost:12201"
+        gelf-tag: store
     build:
       context: ./store
     ports:
